@@ -1,4 +1,6 @@
 import jwt
+import os
+from dotenv import load_dotenv
 from pwdlib import PasswordHash
 from sqlalchemy.orm import Session
 from app.utils.database import get_db
@@ -7,14 +9,15 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
 from datetime import datetime, timedelta, timezone
 
+load_dotenv()
 
-SECRET_KEY = '09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e9'
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv('SECRET_KEY')
+ALGORITHM = os.getenv('ALGORITHM')
+ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
 
 
-oauth2scheme = OAuth2PasswordBearer(tokenUrl='login')
-
+oauth2scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
+print(f'hello + {ACCESS_TOKEN_EXPIRE_MINUTES}')
 
 
 def hash_password(password: str):
@@ -31,7 +34,7 @@ def validate_password(plain_password: str, hashed_password: str):
 
 def create_access_token(data: dict):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     token_type = 'access'
     
     to_encode.update({'exp': expire, 'type': token_type})
@@ -76,7 +79,7 @@ def get_current_user(
             )
     
     # fetch user object
-    user = db.query(user_model.User).filter(user_model.User.user_id == user_id).first()
+    user = db.query(user_model.User).filter(user_model.User.id == user_id).first()
     
     # check user existance
     if not user:
