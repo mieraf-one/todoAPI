@@ -40,7 +40,6 @@ def create_todo(
 
 @router.get('', response_model=List[todo_schema.TodoResponse])
 def get_todos(
-        is_done: bool = Query(None),
         sort_by: str | None = Query('created_at'),
         sort_order: str | None = Query('desc'),
         current_user: user_model.User = Depends(get_current_user),
