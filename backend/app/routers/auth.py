@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from app.schemas import auth as auth_schema
 from sqlalchemy.orm import Session
@@ -69,6 +69,7 @@ def create_user(data: auth_schema.SignupCreate, db: Session = Depends(get_db)):
 
 @router.post('/login', response_model=auth_schema.LoginResponse)
 def login_user(
+        response: Response,
         data: OAuth2PasswordRequestForm = Depends(),
         db: Session = Depends(get_db),
     ):    
@@ -96,4 +97,24 @@ def login_user(
     # create access token
     access_token = utils.create_access_token({'user_id': user.id})
     
-    return {'access_type': 'bearer', 'access_token': access_token}
+    # create refresh token
+    refresh_token = utils.create_refresh_token({'user_id': user.id}, db)
+    
+    # set refresh token in cookie
+    response.set_cookie(
+        key='refresh_token',
+        value=refresh_token,
+        httponly=True,
+        secure=True,
+        samesite='strict'
+    )
+    
+    return {'access_type': 'bearer', 'access_token': access_token, 'refresh_token': refresh_token}
+
+
+@router.post('/refresh', response_model=auth_schema.LoginResponse)
+def refresh_token(request: Request, db: Session = Depends(get_db)):
+    token = request.cookies.get('refresh_token')
+    refreshed_token = utils.refresh_token(token, db)
+    
+    return {'access_token': refreshed_token, 'access_type': 'bearer', 'refresh_token': token}
