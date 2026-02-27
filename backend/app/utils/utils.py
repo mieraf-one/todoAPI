@@ -1,20 +1,22 @@
-import jwt
-import os
-from dotenv import load_dotenv
-from pwdlib import PasswordHash
-from sqlalchemy.orm import Session
-from app.utils.database import get_db
-from app.models import user as user_model, token as token_model
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+import os
+import jwt
+from dotenv import load_dotenv
+from pwdlib import PasswordHash
 from datetime import datetime, timedelta, timezone
 
+from app.utils.database import get_db
+from app.models import user as user_model, token as token_model
+
+# load env
 load_dotenv()
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
 ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
-
 
 oauth2scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 

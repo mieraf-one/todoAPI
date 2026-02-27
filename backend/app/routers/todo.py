@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, status, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from app.utils.utils import get_current_user
+
 from app.models import user as user_model, todo as todo_model
 from app.schemas import todo as todo_schema
+from app.utils.utils import get_current_user
 from app.utils.database import get_db
+
 from typing import List
 
 router = APIRouter(
@@ -11,6 +13,12 @@ router = APIRouter(
     prefix='/todos'
 )
 
+
+'''
+####################################################
+                    POST Todo
+####################################################
+'''
 
 @router.post('', response_model=todo_schema.TodoResponse, status_code=status.HTTP_201_CREATED)
 def create_todo(
@@ -30,6 +38,11 @@ def create_todo(
     
     return new_todo
 
+'''
+####################################################
+                    GET Todo
+####################################################
+'''
 
 @router.get('', response_model=List[todo_schema.TodoResponse])
 def get_todos(
@@ -58,6 +71,13 @@ def get_todos(
     
     return todos
 
+
+'''
+####################################################
+                    GET detail Todo
+####################################################
+'''
+
 @router.get('/{id}', response_model=todo_schema.TodoResponse)
 def get_todo(
         id: int,
@@ -76,6 +96,11 @@ def get_todo(
     )
     
 
+'''
+####################################################
+                    PATCH Todo
+####################################################
+'''
 
 @router.patch('/{id}', response_model=todo_schema.TodoResponse)
 def get_todo(
@@ -108,6 +133,13 @@ def get_todo(
     return todo
     
     
+    
+'''
+####################################################
+                    DELETE Todo
+####################################################
+'''
+
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def get_todo(
         id: int,

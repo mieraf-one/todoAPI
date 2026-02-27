@@ -1,7 +1,6 @@
-from datetime import datetime
-from app.schemas import auth as auth_schema
 from pydantic import BaseModel
-
+from app.schemas import auth as auth_schema
+from datetime import datetime
 
 class TodoCreate(BaseModel):
     title: str

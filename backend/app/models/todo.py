@@ -1,8 +1,10 @@
 from sqlalchemy import Column, String, Integer, DateTime, BOOLEAN, ForeignKey
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
+
 from app.utils.database import Base
 from app.models import user
+
+from datetime import datetime, timezone
 
 
 class Todo(Base):
