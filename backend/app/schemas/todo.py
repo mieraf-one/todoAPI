@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from app.schemas import auth as auth_schema
 from pydantic import BaseModel
 
 
@@ -14,10 +14,11 @@ class TodoUpdate(BaseModel):
  
 class TodoResponse(BaseModel):
     id: int
-    owner_username: str
+    owner: auth_schema.UserCardResponse
     title: str
     content: str
     is_done: bool
+    updated_at: datetime | None
     created_at: datetime
     
     class Config:

@@ -16,5 +16,6 @@ class User(Base):
     
     todos = relationship(
         'Todo', 
-        back_populates='owner'
+        back_populates='owner',
+        cascade='all, delete'
     )

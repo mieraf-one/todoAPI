@@ -20,7 +20,7 @@ def create_todo(
     ):
     
     user_data = data.model_dump()
-    user_data['owner_id'] = current_user.id
+    user_data['owner'] = current_user
     
     new_todo = todo_model.Todo(**user_data)
     
@@ -28,14 +28,7 @@ def create_todo(
     db.commit()
     db.refresh(new_todo)
     
-    return todo_schema.TodoResponse(
-                id=new_todo.id,
-                owner_username=current_user.username,
-                title=new_todo.title,
-                content=new_todo.content,
-                is_done=new_todo.is_done,
-                created_at=new_todo.created_at
-            )
+    return new_todo
 
 
 @router.get('', response_model=List[todo_schema.TodoResponse])
@@ -46,34 +39,24 @@ def get_todos(
         db: Session = Depends(get_db)
     ):
     
+    # fetch user todos
     todos = (
         db.query(todo_model.Todo)
             .filter(todo_model.Todo.owner_id == current_user.id)
     )
     
-    if sort_by in ['created_at', 'title', 'is_done']:
-        column = getattr(todo_model.Todo, sort_by)
+    if sort_by.lower() in ['created_at', 'title', 'is_done']:
+        column = getattr(todo_model.Todo, sort_by) # get column to sort
         
         if sort_order == 'desc':
             column = column.desc()
         elif sort_by == 'asc':
             column = column.asc()
         
-        todos = todos.order_by(column)
+        todos = todos.order_by(column) # sorted
         
     
-    return [
-        todo_schema.TodoResponse(
-            id=todo.id,
-            owner_username=current_user.username,
-            title=todo.title,
-            content=todo.content,
-            is_done=todo.is_done,
-            created_at=todo.created_at
-        )
-        
-        for todo in todos
-    ]
+    return todos
 
 @router.get('/{id}', response_model=todo_schema.TodoResponse)
 def get_todo(
@@ -85,14 +68,7 @@ def get_todo(
     
     for todo in todos:
         if todo.id == id:
-            return todo_schema.TodoResponse(
-                id=todo.id,
-                owner_username=current_user.username,
-                title=todo.title,
-                content=todo.content,
-                is_done=todo.is_done,
-                created_at=todo.created_at
-            )
+            return todo
     
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -129,14 +105,7 @@ def get_todo(
     db.commit()
     db.refresh(todo)
     
-    return todo_schema.TodoResponse(
-            id=todo.id,
-            owner_username=current_user.username,
-            title=todo.title,
-            content=todo.content,
-            is_done=todo.is_done,
-            created_at=todo.created_at
-        )
+    return todo
     
     
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)

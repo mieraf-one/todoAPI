@@ -28,3 +28,7 @@ class LoginResponse(BaseModel):
     access_token: str
     access_type: str
     refresh_token: str
+
+class UserCardResponse(BaseModel):
+    id: int
+    username: str
